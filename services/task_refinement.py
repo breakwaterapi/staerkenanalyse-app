@@ -100,7 +100,7 @@ ANTWORTE NUR MIT DEM KOMPLETTEN HTML-CODE - NICHTS ANDERES!"""
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt},
                 ]
-                response = mistral_client.chat(
+                response = mistral_client.chat.complete(
                     model=MISTRAL_MODEL,
                     messages=messages,
                     temperature=temp,

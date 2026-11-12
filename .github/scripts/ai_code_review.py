@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 try:
-    from mistralai import Mistral
+    from mistralai.client import Mistral
 except ImportError:
     print("❌ mistralai Package nicht gefunden! Installiere mit: pip install mistralai")
     sys.exit(1)

@@ -147,7 +147,7 @@ matplotlib==3.10.6
     # via -r requirements.in
 mdurl==0.1.2
     # via markdown-it-py
-mistralai==0.4.2
+mistralai==2.10.1
     # via -r requirements.in
 numpy==1.26.4
     # via
