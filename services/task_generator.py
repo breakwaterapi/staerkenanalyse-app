@@ -295,7 +295,7 @@ Gib SOFORT NUR das JSON zurück - keine Erklärungen."""
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt},
                 ]
-                response = mistral_client.chat(
+                response = mistral_client.chat.complete(
                     model=MISTRAL_MODEL,
                     messages=messages,
                     temperature=temp,

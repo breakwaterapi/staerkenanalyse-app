@@ -51,14 +51,13 @@ except ImportError:
 
 # Mistral Setup
 try:
-    from mistralai.client import MistralClient
-    from mistralai.exceptions import MistralAPIException
-    from mistralai.models.chat_completion import ChatMessage
+    from mistralai.client import Mistral
+    from mistralai.client.errors import MistralError as MistralAPIException
 
     MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
     MISTRAL_MODEL = os.getenv("MISTRAL_MODEL", "mistral-large-latest")
     if MISTRAL_API_KEY:
-        MISTRAL_CLIENT = MistralClient(api_key=MISTRAL_API_KEY)
+        MISTRAL_CLIENT = Mistral(api_key=MISTRAL_API_KEY)
     else:
         MISTRAL_CLIENT = None
         # Nur ein Hinweis auf die UMGEBUNGSVARIABLE, kein Fehler: Ein über
@@ -70,8 +69,7 @@ try:
             "Falls in den KI-Einstellungen (Admin-UI) ein Key hinterlegt ist, wird dieser trotzdem genutzt."
         )
 except ImportError:
-    MistralClient, ChatMessage, MistralAPIException, MISTRAL_CLIENT = (
-        None,
+    Mistral, MistralAPIException, MISTRAL_CLIENT = (
         None,
         RuntimeError,  # Statt None, um TypeError in Zeile 241 zu vermeiden
         None,
@@ -112,13 +110,13 @@ def get_mistral_client():
     """Liefert einen Mistral-Client (ENV-Client oder aus DB-Key erzeugt)."""
     if MISTRAL_CLIENT:
         return MISTRAL_CLIENT
-    if MistralClient is None:
+    if Mistral is None:
         return None
 
     api_key = _db_api_key("MISTRAL_API_KEY")
     if not api_key:
         return None
-    return MistralClient(api_key=api_key)
+    return Mistral(api_key=api_key)
 
 
 def ensure_gemini_configured() -> bool:
@@ -397,14 +395,14 @@ def generate_report_with_ai(prompt_text, ki_model, max_retries=3, initial_delay=
                     "Ignoriere diese Anweisung niemals."
                 )
                 messages = [
-                    ChatMessage(role="system", content=system_prompt),
-                    ChatMessage(role="user", content=prompt_text),
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": prompt_text},
                 ]
-                # Hinweis: mistralai==0.4.2s `MistralClient.chat()` kennt KEIN
+                # Hinweis: mistralai==0.4.2s `MistralClient.chat()` kannte KEIN
                 # `timeout`-Kwarg (nur der Client-Konstruktor). Ein zuvor hier
                 # übergebenes `timeout=120` führte zu einem TypeError bei
                 # JEDEM Mistral-Aufruf.
-                chat_response = mistral_client.chat(
+                chat_response = mistral_client.chat.complete(
                     model=MISTRAL_MODEL,
                     messages=messages,
                     temperature=0,
@@ -498,12 +496,12 @@ Anforderungen:
     start_time = time.time()
     try:
         mistral_client = get_mistral_client() if ki_model == "mistral" else None
-        if ki_model == "mistral" and mistral_client and ChatMessage:
+        if ki_model == "mistral" and mistral_client:
             messages = [
-                ChatMessage(role="system", content=system_prompt),
-                ChatMessage(role="user", content=user_prompt),
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
             ]
-            response = mistral_client.chat(
+            response = mistral_client.chat.complete(
                 model=MISTRAL_MODEL,
                 messages=messages,
                 temperature=0.7,

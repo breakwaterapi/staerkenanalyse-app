@@ -26,16 +26,9 @@ from models import Group, Participant, SelfAssessment
 # Import API-Clients direkt aus ki_services
 try:
     from ki_services import MISTRAL_CLIENT, GenerativeModel
-
-    # Für Mistral API Message-Format
-    try:
-        from mistralai.models.chat_completion import ChatMessage
-    except ImportError:
-        ChatMessage = None
 except ImportError:
     MISTRAL_CLIENT = None
     GenerativeModel = None
-    ChatMessage = None
 
 
 # =============================================================================
@@ -122,10 +115,10 @@ def _call_ai_api(prompt, max_tokens=300, temperature=0.8):
         Exception: Bei API-Fehler oder fehlenden Clients
     """
     # Versuche zuerst Mistral (bevorzugt für JSON)
-    if MISTRAL_CLIENT and ChatMessage:
+    if MISTRAL_CLIENT:
         try:
-            messages = [ChatMessage(role="user", content=prompt)]
-            response = MISTRAL_CLIENT.chat(
+            messages = [{"role": "user", "content": prompt}]
+            response = MISTRAL_CLIENT.chat.complete(
                 model="mistral-small-latest",
                 messages=messages,
                 temperature=temperature,

@@ -17,8 +17,7 @@ weasyprint
 bleach
 python-docx
 pdfminer.six
-# WICHTIG: mistralai 0.4.2 ist die letzte Version mit Legacy-API (services/ai_client.py nutzt diese)
-mistralai==0.4.2
+mistralai>=2
 google-generativeai
 psycopg2-binary
 gunicorn
